@@ -1,4 +1,4 @@
-package com.dsi.cu23;
+package com.dsi.cu23.models;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,10 @@
-package com.dsi.cu23;
+package com.dsi.cu23.interfaces;
 
 import javax.swing.*;
+
+import com.dsi.cu23.controllers.*;
+import com.dsi.cu23.models.EventoSismico;
+
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;

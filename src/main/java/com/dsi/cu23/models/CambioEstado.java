@@ -1,4 +1,4 @@
-package com.dsi.cu23;
+package com.dsi.cu23.models;
 
 import java.time.LocalDateTime;
 import java.util.List;

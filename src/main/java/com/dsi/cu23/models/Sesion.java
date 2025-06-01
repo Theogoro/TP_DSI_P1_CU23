@@ -1,4 +1,4 @@
-package com.dsi.cu23;
+package com.dsi.cu23.models;
 
 public class Sesion {
     private Usuario usuario;

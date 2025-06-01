@@ -1,11 +1,15 @@
-package com.dsi.cu23;
+package com.dsi.cu23.controllers;
 
 import java.util.List;
+
+import com.dsi.cu23.interfaces.InterfazRegistrarRevManual;
+import com.dsi.cu23.models.Estado;
+import com.dsi.cu23.models.EventoSismico;
 
 /**
  * Gestor para el manejo de la lógica de registro manual de revisiones
  */
-class GestorRegistrarRevManual {
+public class GestorRegistrarRevManual {
     private InterfazRegistrarRevManual interfaz;
     private List<EventoSismico> listaDeEventos;
     private EventoSismico eventoSeleccionado;
@@ -31,7 +35,7 @@ class GestorRegistrarRevManual {
     }
 
     private boolean hayEventosSinRevision() {
-        return listaDeEventos.stream().count() > 0;
+        return (long) listaDeEventos.size() > 0;
     }
 
     public void finCu() {
