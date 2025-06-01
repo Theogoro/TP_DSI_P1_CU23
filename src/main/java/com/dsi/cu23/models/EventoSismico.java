@@ -17,17 +17,18 @@ public class EventoSismico {
     }
 
     public static List<EventoSismico> buscarEventosSinRevision() {
-        List<EventoSismico> eventos = EventoSismico.generarEventosMock()
-                                                    .stream()
-                                                    .filter(evento -> {
-                                                        CambioEstado cambioActual = evento.cambiosEstado.stream()
-                                                                .filter(CambioEstado::esActual)
-                                                                .filter(CambioEstado::sosPteRevision)
-                                                                .findFirst()
-                                                                .orElse(null);
-                                                        return cambioActual != null;
-                                                    })
-                                                    .collect(Collectors.toList());
+        List<EventoSismico> eventos = EventoSismico
+                .generarEventosMock()
+                .stream()
+                .filter(evento -> {
+                    CambioEstado cambioActual = evento.cambiosEstado.stream()
+                            .filter(CambioEstado::esActual)
+                            .filter(CambioEstado::sosPteRevision)
+                            .findFirst()
+                            .orElse(null);
+                    return cambioActual != null;
+                })
+                .collect(Collectors.toList());
 
         return eventos;
     }
@@ -73,7 +74,7 @@ public class EventoSismico {
 
     @Override
     public String toString() {
-        return "Evento Sismico a las " + fechaHoraOcurrencia ;
+        return "Evento Sismico a las " + fechaHoraOcurrencia;
     }
 
     public String toLabel() {
@@ -97,8 +98,7 @@ public class EventoSismico {
         CambioEstado nuevoCambioEstado = new CambioEstado(
                 fechaHoraActual,
                 null,
-                estadoBloqueadoEnRevision
-        );
+                estadoBloqueadoEnRevision);
         this.cambiosEstado.add(nuevoCambioEstado);
     }
 
@@ -108,4 +108,3 @@ public class EventoSismico {
     }
 
 }
-
