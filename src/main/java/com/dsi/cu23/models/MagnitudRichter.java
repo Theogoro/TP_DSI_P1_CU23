@@ -27,7 +27,9 @@ public class MagnitudRichter {
 
     public static MagnitudRichter mockMagnitudRichter() {
         String[] descripciones = MagnitudRichter.mockMagnitudesRichter();
-        double magnitud = Math.random() * 10; // Random magnitude between 0 and 10
+        double magnitud = Math.random() * 10;
+        magnitud = Math.round(magnitud * 100000.0) / 100000.0;
+        
         String descripcion;
         if (magnitud < 2.0) {
             descripcion = descripciones[0];

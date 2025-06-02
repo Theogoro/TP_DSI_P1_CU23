@@ -15,11 +15,11 @@ public class Sesion {
         this(usuario, fechaInicio, null);
     }
 
-    public Usuario conocerUsuario() {
-        return this.usuario;
+    public Empleado conocerUsuario() {
+        return this.usuario.getEmpleado();
     }
 
-    public static Sesion getSesionActiva() {
+    public static Sesion mockSesion() {
         Empleado empleado = new Empleado("Juan", "Pérez", "juan.perez@gmail.com");
         Usuario usuario = new Usuario("juanperez", "contrasenia123", "2023-10-01", empleado);
         return new Sesion(usuario, "2023-10-01 10:00:00");

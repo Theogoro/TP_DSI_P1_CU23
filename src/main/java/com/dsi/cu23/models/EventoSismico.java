@@ -130,7 +130,8 @@ public class EventoSismico {
         CambioEstado nuevoCambioEstado = new CambioEstado(
                 fechaHoraActual,
                 null,
-                estadoBloqueadoEnRevision);
+                estadoBloqueadoEnRevision,
+                null);
         this.cambiosEstado.add(nuevoCambioEstado);
     }
 
@@ -161,5 +162,32 @@ public class EventoSismico {
                 return serie.getSerieTemporal();
             })
             .collect(Collectors.toList());
+    }
+
+    public AlcanceSismo getAlcance() {
+        return this.alcance;
+    }
+
+    public OrigenDeGeneracion getOrigen() {
+        return this.origen;
+    }
+
+    public void registrarRechazo(Estado estadoRechazado, Empleado deLaSesion, LocalDateTime fechaHoraActual) {
+        for (CambioEstado cambio : cambiosEstado) {
+            if (cambio.esActual()) {
+                cambio.setFechaFin(fechaHoraActual);
+                cambio.setResponsable(deLaSesion.toString());
+            }
+        }
+
+        CambioEstado nuevoCambioEstado = new CambioEstado(
+                fechaHoraActual,
+                null,
+                estadoRechazado,
+                deLaSesion.toString()
+        );
+        cambiosEstado.add(nuevoCambioEstado);
+
+        System.out.println("Evento sismico rechazado: " + this.toString());
     }
 }

@@ -1,6 +1,7 @@
 package com.dsi.cu23.controllers;
 
 import java.awt.image.BufferedImage;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ public class GestorRegistrarRevManual {
     private EventoSismico eventoSeleccionado;
     private Estado estadoBloqueadoEnRevision;
     private HashMap<EstacionSismologica, List<SerieTemporal>> estacionesConSeries;
+    private String accion;
     
     public GestorRegistrarRevManual(InterfazRegistrarRevManual interfaz) {
         this.interfaz = interfaz;
@@ -50,7 +52,7 @@ public class GestorRegistrarRevManual {
     public List<EventoSismico> getEventos() { return listaDeEventos; }
     public InterfazRegistrarRevManual getInterfaz() { return interfaz; }
 
-    public void solicitarSeleccionEvento(Integer filaSeleccionada) {
+    public void tomarEvento(Integer filaSeleccionada) {
         if (filaSeleccionada == null || filaSeleccionada < 0 || filaSeleccionada >= listaDeEventos.size()) {
             throw new IllegalArgumentException("Fila seleccionada inválida: " + filaSeleccionada);
         }
@@ -122,7 +124,11 @@ public class GestorRegistrarRevManual {
     }
 
     public void tomarRechazo() {
-      
+      this.habilitarModificacionDatosEventoSismico();
+    }
+
+    private void habilitarModificacionDatosEventoSismico() {
+        this.interfaz.permitirModificacionOrigenMagnitudAlcance(this.eventoSeleccionado.getMagnitud());
     }
 
 
@@ -141,5 +147,56 @@ public class GestorRegistrarRevManual {
 
     public String[] getMagnitudesOpciones() {
         return MagnitudRichter.mockMagnitudesRichter();
+    }
+
+    public void tomarNoModificar() {
+        this.solicitarConfirmarRechazoORevisionExperto();
+    }
+
+    private void solicitarConfirmarRechazoORevisionExperto() {
+        this.interfaz.solicitarConfirmarRechazoORevisionExperto();
+    }
+
+    public void tomarRechazoEvento() {
+        this.accion = "rechazo";
+        this.validarDatosYSeleccionAccion();
+    }
+
+    private void validarDatosYSeleccionAccion() {
+        if (this.accion == null || this.accion.isEmpty()) {
+            throw new IllegalArgumentException("Acción no válida");
+        }
+
+        if (!Double.isNaN(this.eventoSeleccionado.getMagnitud()) && this.eventoSeleccionado.getAlcance() != null && this.eventoSeleccionado.getOrigen() != null) {
+            this.registrarRechazo();
+        }
+    }
+
+    private void registrarRechazo() {
+        Sesion sesionActual = Sesion.mockSesion();
+        Empleado deLaSesion = sesionActual.conocerUsuario();
+        LocalDateTime fechaHoraActual = this.getFechaHoraActual();
+        Estado estadoRechazado = this.buscarEstadoRechazado();
+        this.eventoSeleccionado.registrarRechazo(
+            estadoRechazado,
+            deLaSesion,
+            fechaHoraActual
+        );
+
+        this.finCu();
+    }
+
+    private LocalDateTime getFechaHoraActual() {
+        return LocalDateTime.now();
+    }
+
+    private Estado buscarEstadoRechazado() {
+        List<Estado> estados = Estado.mockEstados();
+        for (Estado estado : estados) {
+            if (estado.sosAmbitoEventoSismico() && estado.sosRechazado()) {
+                return estado;
+            }
+        }
+        throw new IllegalStateException("No se encontró un estado rechazado válido para el evento sísmico.");
     }
 }

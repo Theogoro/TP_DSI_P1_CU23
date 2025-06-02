@@ -26,7 +26,7 @@ public class InterfazRegistrarRevManual {
     private JComboBox<String> clasificacionComboBox;
     private JComboBox<String> origenComboBox;
     private JComboBox<String> alcanceComboBox;
-    private JComboBox<String> magnitudField; // this is gonna be displayed when the user can update data
+    private JTextField magnitudField; // this is gonna be displayed when the user can update data
     private final int ANCHO = 500;
     private final int ALTO = 900;
 
@@ -140,7 +140,7 @@ public class InterfazRegistrarRevManual {
         botonSeleccionarEvento.addActionListener(e -> {
             int selectedRow = table.getSelectedRow();
             if (selectedRow != -1) {
-                this.gestor.solicitarSeleccionEvento(selectedRow);
+                this.tomarEvento(selectedRow);
                 this.ventana.remove(botonSeleccionarEvento);
             } else {
                 JOptionPane.showMessageDialog(this.ventana, "Por favor, seleccione un evento de la lista.", "Error",
@@ -151,25 +151,15 @@ public class InterfazRegistrarRevManual {
         this.actualizarVentana();
     }
 
+    private void tomarEvento(int selectedRow) {
+        this.gestor.tomarEvento(selectedRow);
+        this.table.setEnabled(false);
+    }
+
     private void actualizarVentana() {
         this.ventana.revalidate();
         this.ventana.repaint();
         this.ventana.setVisible(true);
-    }
-
-    private JTextField crearTextFieldNoEditable(String text) {
-        JTextField textField = new JTextField(text);
-        textField.setEditable(false);
-        textField.setEnabled(false);
-        textField.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        return textField;
-    }
-
-    private void limpiarVentana() {
-        this.ventana.getContentPane().removeAll();
-        this.ventana.add(Box.createRigidArea(new Dimension(0, 20))); // Espacio superior
-        this.ventana.add(InterfazRegistrarRevManual.getTitulo("Registrar Revisión Manual"));
-        this.ventana.add(Box.createRigidArea(new Dimension(0, 20))); // Espacio superior
     }
 
     public static JLabel getTitulo(String label) {
@@ -182,47 +172,74 @@ public class InterfazRegistrarRevManual {
     // God save us and bless the person who mantains this code. Theo - 2025
     public void mostrarClasificacionOrigenAlcance(HashMap<String, Object> datos) {
         this.inputsPanel = new JPanel();
-        this.inputsPanel.add(Box.createRigidArea(new Dimension(0, 20))); // Espacio superior
-        this.table.setEnabled(false); // Deshabilita la tabla para evitar interacciones
-        // this.ventana.add(InterfazRegistrarRevManual.getTitulo("Datos del Evento Seleccionado"));
-        // this.ventana.add(Box.createRigidArea(new Dimension(0, 20)));
 
         inputsPanel.setLayout(new BoxLayout(inputsPanel, BoxLayout.Y_AXIS));
-        inputsPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        inputsPanel.setMaximumSize(new Dimension(ANCHO - 40, 200));
+
         inputsPanel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(Color.GRAY),
-            "Datos del Evento Seleccionado",
-            javax.swing.border.TitledBorder.LEFT,
-            javax.swing.border.TitledBorder.TOP,
-            new Font("Arial", Font.BOLD, 14)
-        ));
+                BorderFactory.createLineBorder(Color.GRAY),
+                "Datos del Evento Seleccionado",
+                javax.swing.border.TitledBorder.LEFT,
+                javax.swing.border.TitledBorder.TOP,
+                new Font("Arial", Font.BOLD, 14)));
+
+        // Agregar espacio inicial
+        inputsPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
         // Clasificación
         this.clasificacionComboBox = new JComboBox<>(this.gestor.getClasificacionesOpciones());
         this.clasificacionComboBox.setSelectedItem(datos.get("Clasificación del sismo"));
-        // inputsPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-        inputsPanel.add(new JLabel("Clasificación:", JLabel.LEFT));
+        this.clasificacionComboBox.setEnabled(false);
+        this.clasificacionComboBox.setFocusable(false);
+        this.clasificacionComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        this.clasificacionComboBox
+                .setMaximumSize(new Dimension(Integer.MAX_VALUE, this.clasificacionComboBox.getPreferredSize().height));
+
+        JLabel labelClasificacion = new JLabel("Clasificación:");
+        labelClasificacion.setAlignmentX(Component.LEFT_ALIGNMENT);
+        inputsPanel.add(labelClasificacion);
+        inputsPanel.add(Box.createRigidArea(new Dimension(0, 5)));
         inputsPanel.add(this.clasificacionComboBox);
+        inputsPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
         // Origen
         this.origenComboBox = new JComboBox<>(this.gestor.getOrigenesOpciones());
         this.origenComboBox.setSelectedItem(datos.get("Origen de generación"));
+        this.origenComboBox.setEnabled(false);
+        this.origenComboBox.setFocusable(false);
+        this.origenComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        this.origenComboBox
+                .setMaximumSize(new Dimension(Integer.MAX_VALUE, this.origenComboBox.getPreferredSize().height));
+
+        JLabel labelOrigen = new JLabel("Origen:");
+        labelOrigen.setAlignmentX(Component.LEFT_ALIGNMENT);
+        inputsPanel.add(labelOrigen);
         inputsPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-        inputsPanel.add(new JLabel("Origen:", JLabel.LEFT));
         inputsPanel.add(this.origenComboBox);
+        inputsPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
         // Alcance
         this.alcanceComboBox = new JComboBox<>(this.gestor.getAlcancesOpciones());
         this.alcanceComboBox.setSelectedItem(datos.get("Alcance del sismo"));
+        this.alcanceComboBox.setEnabled(false);
+        this.alcanceComboBox.setFocusable(false);
+        this.alcanceComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        this.alcanceComboBox
+                .setMaximumSize(new Dimension(Integer.MAX_VALUE, this.alcanceComboBox.getPreferredSize().height));
+
+        JLabel labelAlcance = new JLabel("Alcance:");
+        labelAlcance.setAlignmentX(Component.LEFT_ALIGNMENT);
+        inputsPanel.add(labelAlcance);
         inputsPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-        inputsPanel.add(new JLabel("Alcance:", JLabel.LEFT));
         inputsPanel.add(this.alcanceComboBox);
 
-        inputsPanel.setMaximumSize(new Dimension(ANCHO - 40, 190));
-        inputsPanel.setPreferredSize(new Dimension(ANCHO - 40, 190));
-        inputsPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
+        // Agregar espacio final
+        inputsPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        // Configurar el tamaño del panel
+        inputsPanel.setMaximumSize(new Dimension(ANCHO - 40, 200));
+        inputsPanel.setPreferredSize(new Dimension(ANCHO - 40, 200));
+        inputsPanel.setAlignmentX(Component.CENTER_ALIGNMENT); // Centrar el panel en la ventana
+
         this.ventana.add(inputsPanel);
         this.ventana.add(Box.createRigidArea(new Dimension(0, 10))); // Espacio
         this.actualizarVentana();
@@ -248,7 +265,6 @@ public class InterfazRegistrarRevManual {
             scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             scrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
             scrollPane.setMaximumSize(new Dimension(ANCHO, 200));
-
             tabbedPane.addTab(estacion.getNombre(), scrollPane);
         }
 
@@ -274,7 +290,7 @@ public class InterfazRegistrarRevManual {
 
         JButton botonRechazarMapa = new JButton("Rechazar ver mapa");
         botonRechazarMapa.addActionListener(e -> {
-            this.gestor.tomarRechazo();
+            this.tomarRechazo();
             // remove buttons and update the window
             this.ventana.remove(panelBotones);
             this.actualizarVentana();
@@ -285,6 +301,97 @@ public class InterfazRegistrarRevManual {
 
         this.ventana.add(panelBotones);
         this.actualizarVentana();
+    }
+
+    private void tomarRechazo() {
+        this.gestor.tomarRechazo();
+    }
+
+    public void permitirModificacionOrigenMagnitudAlcance(double magnitud) {
+        this.origenComboBox.setEnabled(true);
+        this.origenComboBox.setFocusable(true);
+        this.alcanceComboBox.setEnabled(true);
+        this.alcanceComboBox.setFocusable(true);
+
+        this.magnitudField = new JTextField();
+        this.magnitudField.setMaximumSize(new Dimension(Integer.MAX_VALUE, this.magnitudField.getPreferredSize().height));
+        this.magnitudField.setAlignmentX(Component.LEFT_ALIGNMENT);
+        this.magnitudField.setEditable(true);
+        this.magnitudField.setFocusable(true);
+        this.magnitudField.setToolTipText("Ingrese la magnitud del evento sismico");
+        this.magnitudField.setText(String.valueOf(magnitud));
+        this.magnitudField.setPreferredSize(new Dimension(100, this.magnitudField.getPreferredSize().height));
+        this.magnitudField.setEnabled(true);
+        this.magnitudField.setFocusable(true);
+        this.inputsPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Espacio superior
+        JLabel labelMagnitud = new JLabel("Magnitud:");
+        labelMagnitud.setAlignmentX(Component.LEFT_ALIGNMENT);
+        this.inputsPanel.add(labelMagnitud);
+        this.inputsPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+        this.inputsPanel.add(this.magnitudField);
+        this.inputsPanel.setMaximumSize(new Dimension(ANCHO - 40, 260));
+        // display 2 buttons, "Modificar" and "No hacer modificaciones"
+        JPanel panelBotones = new JPanel(new GridLayout(1, 2, 10, 0));
+        panelBotones.setMaximumSize(new Dimension(ANCHO - 40, 40));
+        panelBotones.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JButton botonModificar = new JButton("Modificar");
+        botonModificar.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this.ventana,
+                    "Funcionalidad de modificación de mapa no implementada.",
+                    "Información", JOptionPane.INFORMATION_MESSAGE);
+        });
+        JButton botonNoModificar = new JButton("No hacer modificaciones");
+        botonNoModificar.addActionListener(e -> {
+            this.ventana.remove(panelBotones);
+            this.tomarNoModificar();
+        });
+
+        panelBotones.add(botonModificar);
+        panelBotones.add(botonNoModificar);
+        this.ventana.add(panelBotones);
+        this.actualizarVentana();
+    }
+
+    private void tomarNoModificar() {
+        this.gestor.tomarNoModificar();
+    }
+
+    public void solicitarConfirmarRechazoORevisionExperto() {
+        // Confirmar evento, Rechazar evento o Solicitar revisión a experto.
+        // mostrar los 3 botones en una fila, los botones de confirmar y confirmar deberan de mostrar el mensaje "no implemenetado"
+        JPanel panelBotones = new JPanel(new GridLayout(1, 3, 10, 0));
+        panelBotones.setMaximumSize(new Dimension(ANCHO - 40, 40));
+        panelBotones.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JButton botonConfirmar = new JButton("Confirmar Evento");
+        botonConfirmar.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this.ventana,
+                    "Funcionalidad de confirmación de evento no implementada.",
+                    "Información", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        JButton botonRechazar = new JButton("Rechazar Evento");
+        botonRechazar.addActionListener(e -> {
+            this.ventana.remove(panelBotones);
+            this.actualizarVentana();
+            this.tomarRechazarEvento();
+        });
+
+        JButton botonRevisionExperto = new JButton("Solicitar Revisión a Experto");
+        botonRevisionExperto.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this.ventana,
+                    "Funcionalidad de revisión a experto no implementada.",
+                    "Información", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        panelBotones.add(botonConfirmar);
+        panelBotones.add(botonRechazar);
+        panelBotones.add(botonRevisionExperto);
+        this.ventana.add(panelBotones);
+        this.actualizarVentana();
+    }
+
+    private void tomarRechazarEvento() {
+        this.gestor.tomarRechazoEvento();
     }
 
 }
