@@ -2,18 +2,33 @@ package com.dsi.cu23.models;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.dsi.cu23.records.RecordMuestra;
+import com.dsi.cu23.utils.LocalDateTimeFormat;
+
 public class EventoSismico {
     private LocalDateTime fechaHoraOcurrencia;
-    private Coordenadas coordenadas;
+    private Coordenadas[] coordenadas; // 1er epicentro y 2do hipoepicentro
     private MagnitudRichter valorMagnitud;
     private List<CambioEstado> cambiosEstado = CambioEstado.mockCambios();
+    private ClasificacionSismo clasificacionSismo;
+    private OrigenDeGeneracion origen;
+    private AlcanceSismo alcance;
+    private List<SerieTemporal> seriesTemporales;
 
-    public EventoSismico(LocalDateTime fechaHoraOcurrencia, Coordenadas coordenadas) {
+    public EventoSismico(LocalDateTime fechaHoraOcurrencia, Coordenadas[] coordenadas) {
         this.fechaHoraOcurrencia = fechaHoraOcurrencia;
         this.coordenadas = coordenadas;
+
+        // Mock data for demo
+        this.valorMagnitud = MagnitudRichter.mockMagnitudRichter();
+        this.clasificacionSismo = ClasificacionSismo.mockClasificacionSismo();
+        this.origen = OrigenDeGeneracion.mockOrigenDeGeneracion();
+        this.alcance = AlcanceSismo.mockAlcanceSismo();
+        this.seriesTemporales = SerieTemporal.mockSeriesTemporales();
     }
 
     public static List<EventoSismico> buscarEventosSinRevision() {
@@ -36,13 +51,29 @@ public class EventoSismico {
     private static List<EventoSismico> generarEventosMock() {
         List<EventoSismico> eventos = new ArrayList<>();
         eventos.add(new EventoSismico(
-                LocalDateTime.of(2023, 10, 1, 12, 0), new Coordenadas(37.77, -122.42)));
+                LocalDateTime.of(2023, 10, 1, 12, 0),
+                new Coordenadas[] {
+                    new Coordenadas(37.77, -122.42), // epicentro
+                    new Coordenadas(37.80, -122.45)  // hipoepicentro
+                }));
         eventos.add(new EventoSismico(
-                LocalDateTime.of(2023, 10, 2, 14, 30), new Coordenadas(34.05, -118.25)));
+                LocalDateTime.of(2023, 10, 2, 14, 30),
+                new Coordenadas[] {
+                    new Coordenadas(34.05, -118.25),
+                    new Coordenadas(34.08, -118.28)
+                }));
         eventos.add(new EventoSismico(
-                LocalDateTime.of(2023, 10, 3, 9, 45), new Coordenadas(36.16, -115.15)));
+                LocalDateTime.of(2023, 10, 3, 9, 45),
+                new Coordenadas[] {
+                    new Coordenadas(36.16, -115.15),
+                    new Coordenadas(36.18, -115.18)
+                }));
         eventos.add(new EventoSismico(
-                LocalDateTime.of(2023, 10, 4, 11, 0), new Coordenadas(40.71, -74.01)));
+                LocalDateTime.of(2023, 10, 4, 11, 0),
+                new Coordenadas[] {
+                    new Coordenadas(40.71, -74.01),
+                    new Coordenadas(40.74, -74.04)
+                }));
         return eventos;
     }
 
@@ -55,12 +86,12 @@ public class EventoSismico {
         return fechaHoraOcurrencia;
     }
 
-    public Coordenadas getCoordenadas() {
+    public Coordenadas[] getCoordenadas() {
         return coordenadas;
     }
 
-    public MagnitudRichter getMagnitud() {
-        return valorMagnitud;
+    public double getMagnitud() {
+        return valorMagnitud.getMagnitud();
     }
 
     // Setters
@@ -68,21 +99,22 @@ public class EventoSismico {
         this.fechaHoraOcurrencia = fechaHoraOcurrencia;
     }
 
-    public void setCoordenadas(Coordenadas coordenadas) {
+    public void setCoordenadas(Coordenadas[] coordenadas) {
         this.coordenadas = coordenadas;
     }
 
     @Override
     public String toString() {
-        return "Evento Sismico a las " + fechaHoraOcurrencia;
+        return LocalDateTimeFormat.format(fechaHoraOcurrencia);
     }
 
     public String toLabel() {
         return String.format("Evento: %s, Ubicación: %s",
-                fechaHoraOcurrencia, coordenadas);
+                LocalDateTimeFormat.format(fechaHoraOcurrencia), coordenadas);
     }
 
     public void bloquear(Estado estadoBloqueadoEnRevision) {
+        System.out.println("Bloqueando evento sismico: " + this.toString());
         CambioEstado cambioActual = this.cambiosEstado.stream()
                 .filter(CambioEstado::esActual)
                 .filter(CambioEstado::sosPteRevision)
@@ -102,9 +134,32 @@ public class EventoSismico {
         this.cambiosEstado.add(nuevoCambioEstado);
     }
 
-    public void obtenerDatosRegistrados() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'obtenerDatosRegistrados'");
+    public HashMap<String,Object> obtenerDatosRegistrados() {
+        String clasificacion = this.clasificacionSismo.getClasificacion();
+        String origenGeneracion = this.origen.getOrigenGeneracion();
+        String alcance = this.alcance.getAlcance();
+
+        HashMap<SerieTemporal, RecordMuestra[]> detalleSeries = new HashMap<>();
+        for (SerieTemporal serie : this.seriesTemporales) {
+            detalleSeries.put(serie, serie.buscarVelocidadLongitudFrecuencia());
+        }
+        return new HashMap<String, Object>() {{
+            put("Fecha de ocurrencia", fechaHoraOcurrencia);
+            // put("Coordenadas", coordenadas);
+            // put("Magnitud", valorMagnitud.getMagnitud());
+            put("Clasificación del sismo", clasificacion);
+            put("Origen de generación", origenGeneracion);
+            put("Alcance del sismo", alcance);
+            put("Series temporales", detalleSeries);
+        }};
     }
 
+    public List<SerieTemporal> getSerieTemporal() {
+        return seriesTemporales
+            .stream()
+            .map(serie -> {
+                return serie.getSerieTemporal();
+            })
+            .collect(Collectors.toList());
+    }
 }
